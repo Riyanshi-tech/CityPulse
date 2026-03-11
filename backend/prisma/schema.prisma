@@ -5,6 +5,16 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
 
 model User {
   id        Int        @id @default(autoincrement())
@@ -22,6 +32,7 @@ model User {
   payments  Payment[]
   reviews   Review[]
   tickets   Ticket[]
+  refreshTokens RefreshToken[]
 
   @@index([role])
 }
