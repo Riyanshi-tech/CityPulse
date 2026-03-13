@@ -1,17 +1,38 @@
 import { Router } from "express";
+import {
+  createEventController,
+  getAllEventsController,
+  getEventByIdController,
+  updateEventController,
+  deleteEventController
+} from "../controllers/event.controller";
+
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { roleMiddleware } from "../middlewares/role.middleware";
-import { createEventController, deleteEventController } from "../controllers/event.controller";
 
 const router = Router();
+
+
+router.get("/events", getAllEventsController);
+
+router.get("/events/:id", getEventByIdController);
+
 
 router.post(
   "/events",
   authMiddleware,
   roleMiddleware(["ORGANIZER"]),
-   createEventController 
-  
+  createEventController
 );
+
+
+router.patch(
+  "/events/:id",
+  authMiddleware,
+  roleMiddleware(["ORGANIZER"]),
+  updateEventController
+);
+
 
 router.delete(
   "/events/:id",
@@ -19,5 +40,6 @@ router.delete(
   roleMiddleware(["ADMIN"]),
   deleteEventController
 );
+
 
 export default router;

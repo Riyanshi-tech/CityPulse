@@ -2,15 +2,20 @@ import { Pool } from 'pg';
 import 'dotenv/config';
 
 async function main() {
-  const connectionString = process.env.DATABASE_URL;
-  console.log("Connection String starts with:", connectionString?.substring(0, 20) + "...");
+  const connectionString = process.env.DATABASE_URL?.trim();
+  console.log("Connection String ends with:", connectionString?.substring(connectionString.length - 20));
   
   if (!connectionString) {
     console.error("DATABASE_URL is not defined!");
     return;
   }
 
-  const pool = new Pool({ connectionString });
+  const pool = new Pool({ 
+    connectionString,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  });
   
   try {
     const client = await pool.connect();

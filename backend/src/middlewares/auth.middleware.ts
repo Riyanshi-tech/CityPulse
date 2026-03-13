@@ -25,16 +25,16 @@ export const authMiddleware = (
       });
     }
 
-    
-    const parts = authHeader.split(" ");
+    // Robust token extraction
+    const [scheme, token] = authHeader.split(/\s+/);
 
-    if (parts.length !== 2 || parts[0] !== "Bearer") {
+    if (!scheme || scheme.toLowerCase() !== "bearer" || !token) {
+      console.log("Invalid Auth Header Format:", authHeader);
       return res.status(401).json({
-        message: "Invalid authorization format"
+        message: "Invalid authorization format. Expected 'Bearer <token>'"
       });
     }
 
-    const token = parts[1];
     const decoded = jwt.verify(token, ACCESS_SECRET);
     req.user = decoded;
     next();
