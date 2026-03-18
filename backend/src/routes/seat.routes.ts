@@ -8,7 +8,7 @@ const router = Router();
 router.post(
   "/venues/:venueId/seats",
   authMiddleware,
-  roleMiddleware(["ADMIN"]),
+  roleMiddleware(["ADMIN","ORGANIZER"]),
   createVenueSeatsController
 );
 
