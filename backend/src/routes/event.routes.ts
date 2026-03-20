@@ -9,6 +9,7 @@ import {
 
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { roleMiddleware } from "../middlewares/role.middleware";
+import { lockSeatsController } from "../controllers/seatLock.controller";
 
 const router = Router();
 
@@ -41,5 +42,9 @@ router.delete(
   deleteEventController
 );
 
-
+router.post(
+  "/events/:eventId/lock-seats",
+  authMiddleware,
+  lockSeatsController
+);
 export default router;

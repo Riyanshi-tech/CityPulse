@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   createVenueController,
   getAllVenuesController,
-  getVenueByIdController,
+  
   updateVenueController,
   deleteVenueController
 } from "../controllers/venue.controller";
@@ -13,7 +13,7 @@ import { roleMiddleware } from "../middlewares/role.middleware";
 const router = Router();
 
 router.get("/venues", getAllVenuesController);
-router.get("/venues/:id", getVenueByIdController);
+
 
 router.post(
   "/venues",

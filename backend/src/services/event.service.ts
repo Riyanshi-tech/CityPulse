@@ -22,3 +22,46 @@ export const createEventService = async (data: any, organizerId: number) => {
 
   return event;
 };
+export const getAllEventsService = async () => {
+  return await prisma.events.findMany({
+    include: {
+      venue: true,
+      organizer: true,
+    },
+  });
+};
+
+export const getEventByIdService = async (id: number) => {
+  return await prisma.events.findUnique({
+    where: { id },
+    include: {
+      venue: true,
+      organizer: true,
+      eventSeats: true,
+    },
+  });
+};
+
+export const updateEventService = async (id: number, data: any) => {
+  return await prisma.events.update({
+    where: { id },
+    data: {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      startDateTime: data.startDateTime
+        ? new Date(data.startDateTime)
+        : undefined,
+      endDateTime: data.endDateTime
+        ? new Date(data.endDateTime)
+        : undefined,
+      venueId: data.venueId,
+    },
+  });
+};
+
+export const deleteEventService = async (id: number) => {
+  return await prisma.events.delete({
+    where: { id },
+  });
+};

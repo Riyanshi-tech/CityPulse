@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import {
   createVenueService,
   getAllVenuesService,
-  getVenueByIdService,
+  
   updateVenueService,
   deleteVenueService
 } from "../services/venue.service";
@@ -28,14 +28,7 @@ export const getAllVenuesController = async (req: Request, res: Response) => {
   }
 };
 
-export const getVenueByIdController = async (req: Request, res: Response) => {
-  try {
-    const venue = await getVenueByIdService(Number(req.params.id));
-    res.json(venue);
-  } catch (error) {
-    res.status(500).json({ message: "Venue not found" });
-  }
-};
+
 
 export const updateVenueController = async (req: Request, res: Response) => {
   try {

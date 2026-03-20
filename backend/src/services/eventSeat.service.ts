@@ -14,7 +14,7 @@ export const createEventSeats = async (eventId: number, venueId: number) => {
     eventId,
     seatId: seat.id,
   }));
-
+ 
   
   await prisma.eventSeat.createMany({
     data: eventSeatsData,

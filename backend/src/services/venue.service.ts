@@ -16,11 +16,7 @@ export const getAllVenuesService = async () => {
   return await prisma.venue.findMany();
 };
 
-export const getVenueByIdService = async (id: number) => {
-  return await prisma.venue.findUnique({
-    where: { id }
-  });
-};
+
 
 export const updateVenueService = async (id: number, data: any) => {
   return await prisma.venue.update({

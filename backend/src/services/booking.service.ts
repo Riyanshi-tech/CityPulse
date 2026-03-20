@@ -1,38 +1,183 @@
+import { id } from "zod/v4/locales";
 import prisma from "../lib/prisma";
-
-export const lockSeats = async (
+import { razorpayInstance } from "../lib/razorpay";
+import { verifyRazorpaySignature } from "../utils/verify";
+import { generateQRCode } from "../utils/qrCode";
+export const createBooking = async (
+  userId: number,
   eventId: number,
-  seatType: "VIP" | "REGULAR" | "BALCONY",
-  quantity: number
+  seatIds: string[]
 ) => {
 
   return prisma.$transaction(async (tx) => {
+
+    // Step 1: Fetch seats
     const seats = await tx.eventSeat.findMany({
       where: {
-        eventId,
-        seat: {
-          seatType
-        },
-        status: "AVAILABLE"
-      },
-      take: quantity
+        id: { in: seatIds },
+        eventId
+      }
     });
-    if (seats.length < quantity) {
-      throw new Error("Not enough seats available");
+
+    if (seats.length !== seatIds.length) {
+      throw new Error("Some seats not found");
     }
 
-    const seatIds = seats.map(seat => seat.id);
+    // Step 2: Validate LOCK
+    for (const seat of seats) {
+      if (seat.status !== "LOCKED") {
+        throw new Error("Seat is not locked");
+      }
+
+      //  if you add lockedBy later, validate here
+    }
+
+    //  Step 3: Calculate total
+    const totalAmount = seats.length * 100; // later dynamic pricing
+
+    //  Step 4: Create booking
+    const booking = await tx.booking.create({
+      data: {
+        userId,
+        eventId,
+        totalAmount,
+        status: "PENDING_PAYMENT",
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 min
+      }
+    });
+
+    //  Step 5: Attach seats to booking
     await tx.eventSeat.updateMany({
       where: {
         id: { in: seatIds }
       },
       data: {
-        status: "LOCKED",
-        lockedAt: new Date()
+        bookingId: booking.id
       }
     });
 
-    return seats;
+    return booking;
   });
 
+};
+// logic for payment creation
+ export const createPaymentService = async(
+  bookingId :string,
+  userId:number
+ )=>{
+  const booking = await prisma.booking.findUnique({
+    where:{id: (bookingId)},
+    include:{
+      eventSeats:true
+    }
+  }); 
+  if(!booking) throw new Error("Booking not found");
+  if(booking.userId !== userId) throw new Error("Unauthorized");
+  if(booking.status !== "PENDING_PAYMENT") throw new Error("Invalid booking status");
+  if( booking.expiresAt &&booking.expiresAt < new Date()) throw new Error("Booking expired");
+
+const order = await razorpayInstance.orders.create({
+    amount: booking.totalAmount * 100, // paisa
+    currency: "INR",
+    receipt: bookingId
+  });
+  // create payment record
+  const payment = await prisma.payment.create({
+    data:{
+      bookingId: booking.id,
+      userId: booking.userId,
+      amount: booking.totalAmount,
+      status: "CREATED",
+      gateway:"RAZORPAY"
+    }
+  });
+  return payment;
+ }
+ // logic for payment confirmation
+ export const confirmPaymentService = async(
+  bookingId: string,
+  paymentId: string,
+  userId: number,
+  signature: string
+)=>{
+    // Verify Razorpay signature
+    const isSignatureValid = verifyRazorpaySignature(bookingId, paymentId, signature);
+    if (!isSignatureValid) {
+      throw new Error("Invalid payment signature");
+    }
+
+    return prisma.$transaction(async(tx)=>{
+      const booking = await tx.booking.findUnique({
+        where:{id: (bookingId)},
+        include:{eventSeats:true}
+      });
+      if(!booking) throw new Error("Booking not found");
+      if(booking.userId !== userId) throw new Error("Unauthorized");
+      if(booking.status !== "PENDING_PAYMENT") throw new Error("Invalid booking status");
+      if( booking.expiresAt &&booking.expiresAt < new Date()) throw new Error("Booking expired");
+      for(const seat of booking.eventSeats){
+        if(seat.status !== "LOCKED"){
+          throw new Error("Seat is not locked");
+        }
+      }
+
+      // update payment status
+      await tx.payment.updateMany({
+        where: { bookingId: bookingId },
+        data: {
+          status: "SUCCESS",
+          gatewayPaymentId: paymentId,
+          completedAt: new Date()
+        },
+      })
+       //confirm booking
+    await tx.booking.update({
+      where:{id: (bookingId)},
+      data:{
+        status:"CONFIRMED",
+        confirmedAt: new Date()
+      }
+    }) 
+
+    // mark seats as booked
+    await tx.eventSeat.updateMany({
+      where: {
+        bookingId: bookingId
+      },
+      data: {
+        status: "BOOKED",
+        lockedAt: null,
+        lockedById: null
+      }
+    });
+    // generate tickets
+    const ticketsData = [];
+
+for (const seat of booking.eventSeats) {
+
+  const ticketCode = `TICKET-${Date.now()}-${seat.id}`;
+
+  const qrData = JSON.stringify({
+    ticketCode,
+    eventId: booking.eventId,
+    userId: booking.userId,
+    seatId: seat.id
+  });
+
+  const qrCodeImage = await generateQRCode(qrData);
+
+  ticketsData.push({
+    bookingId,
+    eventSeatId: seat.id,
+    userId: booking.userId,
+    eventId: booking.eventId,
+    ticketCode,
+    qrCodeData: qrCodeImage // 🔥 now actual image
+  });
+}
+
+await tx.ticket.createMany({
+  data: ticketsData
+});
+  });
 };
