@@ -7,7 +7,7 @@ export const loginController = async (req: Request, res: Response) => {
 
   const { email, password } = req.body;
 
-  const { accessToken, refreshToken } = await loginUser(email, password);
+  const { accessToken, refreshToken, user } = await loginUser(email, password);
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
@@ -15,7 +15,7 @@ export const loginController = async (req: Request, res: Response) => {
     sameSite: "strict",
   });
 
-  res.json({ accessToken });
+  res.json({ accessToken, user });
 };
 export const refreshController = async (req : Request, res: Response) => {
 

@@ -40,7 +40,11 @@ export const loginUser = async (email: string, password: string) => {
     },
   });
 
-  return { accessToken, refreshToken };
+  return {
+    accessToken,
+    refreshToken,
+    user: { id: user.id, email: user.email, username: user.username },
+  };
 };
 
 
