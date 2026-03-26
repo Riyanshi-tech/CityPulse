@@ -10,8 +10,14 @@ import seatRoutes from './routes/seat.routes';
 import reviewRoutes from './routes/review.routes';
 import favoriteRoutes from './routes/favorite.routes';
 import ticketRoutes from './routes/ticket.routes';
-
+import cors from "cors";
 const app = express();
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 

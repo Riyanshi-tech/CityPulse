@@ -7,10 +7,15 @@ const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET!;
 
 
 // LOGIN SERVICE
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (emailOrUsername: string, password: string) => {
 
-  const user = await prisma.user.findUnique({
-    where: { email },
+  const user = await prisma.user.findFirst({
+    where: { 
+      OR: [
+        { email: emailOrUsername },
+        { username: emailOrUsername }
+      ]
+    },
   });
 
   if (!user) {

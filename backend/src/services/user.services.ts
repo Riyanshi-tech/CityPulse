@@ -10,8 +10,10 @@ export const createUser = async(
   password: string;
   firstName: string;
   lastName: string;
-  role: "ADMIN" | "USER" | "ORGANIZER";
+  role : "ADMIN" | "USER" | "ORGANIZER";
         }
 ) => {
+    console.log("PRISMA CREATE DATA:", JSON.stringify(data, null, 2));
     return await prisma.user.create({ data });
+
 };

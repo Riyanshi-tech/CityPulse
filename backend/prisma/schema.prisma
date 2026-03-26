@@ -6,35 +6,36 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
 model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
   expiresAt DateTime
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  username  String     @unique
-  password  String
-  firstName String
-  lastName  String
-  createdAt DateTime   @default(now())
-  email     String     @unique
-  role      userRole   @default(USER)
-  updatedAt DateTime   @updatedAt
-  bookings  Booking[]
-  events    Events[]
-  favorites Favorite[]
-  payments  Payment[]
-  reviews   Review[]
-  tickets   Ticket[]
-  eventSeats  EventSeat[]
+  id            Int            @id @default(autoincrement())
+  username      String         @unique
+  password      String
+  firstName     String
+  lastName      String
+  createdAt     DateTime       @default(now())
+  email         String         @unique
+  role          userRole       @default(USER)
+  updatedAt     DateTime       @updatedAt
+  bookings      Booking[]
+  eventSeats    EventSeat[]
+  events        Events[]
+  favorites     Favorite[]
+  payments      Payment[]
   refreshTokens RefreshToken[]
+  reviews       Review[]
+  tickets       Ticket[]
 
   @@index([role])
 }
@@ -99,21 +100,21 @@ model Seat {
 }
 
 model EventSeat {
-  id        String     @id @default(uuid())
-  eventId   Int
-  seatId    String
-  bookingId String?
-  status    SeatStatus @default(AVAILABLE)
-  lockedAt  DateTime?
-  bookedAt  DateTime?
-  lockedById Int?       // ✅ foreign key
-  lockedBy   User?      @relation(fields: [lockedById], references: [id]) // 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  booking   Booking?   @relation(fields: [bookingId], references: [id])
-  event     Events     @relation(fields: [eventId], references: [id])
-  seat      Seat       @relation(fields: [seatId], references: [id])
-  tickets   Ticket?
+  id         String     @id @default(uuid())
+  eventId    Int
+  seatId     String
+  bookingId  String?
+  status     SeatStatus @default(AVAILABLE)
+  lockedAt   DateTime?
+  bookedAt   DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  lockedById Int?
+  booking    Booking?   @relation(fields: [bookingId], references: [id])
+  event      Events     @relation(fields: [eventId], references: [id])
+  lockedBy   User?      @relation(fields: [lockedById], references: [id])
+  seat       Seat       @relation(fields: [seatId], references: [id])
+  tickets    Ticket?
 
   @@unique([eventId, seatId])
 }

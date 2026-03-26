@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { api } from "../../api/axios";
@@ -8,13 +9,13 @@ export default function Login() {
   const navigate = useNavigate();
   const { setUser } = useAuth(); //  important
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
       const res = await api.post("/auth/login", {
-        email,
+        emailOrUsername: identifier,
         password,
       });
       localStorage.setItem("token", res.data.accessToken);
@@ -44,11 +45,11 @@ export default function Login() {
         </h2>
 
         <input
-          type="email"
-          placeholder="Email"
+          type="text"
+          placeholder="Email or Username"
           className="w-full mb-4 px-4 py-2 rounded bg-white/10 text-white"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
         />
 
         <input
