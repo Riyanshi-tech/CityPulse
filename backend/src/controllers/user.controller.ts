@@ -18,8 +18,18 @@ export const creatUserController = async (req: Request, res: Response, next: imp
 
         const validatedData = createUserSchema.parse(req.body); 
         const { username, email, password, firstName, lastName, role } = validatedData;
-        const hashedpassword = await hashpassword(password);
-        const user = await createUser({ username, email, password:hashedpassword, firstName, lastName, role });
+        const trimmedPassword = password.trim();
+        const hashedpassword = await hashpassword(trimmedPassword);
+        const user = await createUser({ 
+            username: username.trim(), 
+            email: email.trim(), 
+            password: hashedpassword, 
+            firstName: firstName.trim(), 
+            lastName: lastName.trim(), 
+            role 
+        });
+
+
         console.log("User created successfully:", user);
        return  res.status(201).json(user);
     } catch (error: any) {

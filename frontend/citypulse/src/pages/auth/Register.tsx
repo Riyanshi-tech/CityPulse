@@ -6,7 +6,9 @@ import { useNavigate } from "react-router-dom";
 export default function Register() {
   const navigate = useNavigate();
    const [role, setRole] = useState<"USER" | "ORGANIZER" |"ADMIN">("USER");
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
+
     username: "",
     email: "",
     password: "",
@@ -22,7 +24,9 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
+    setLoading(true);
     try {
+
       await api.post("/users", { ...form, role });
 
       alert("Registered successfully 🎉");
@@ -32,8 +36,11 @@ export default function Register() {
       console.error("Registration Error details:", err.response?.data || err.message);
       const errorMessage = err.response?.data?.message || err.response?.data?.error || "Registration failed";
       alert(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     
@@ -120,18 +127,18 @@ export default function Register() {
           onChange={handleChange}
         />
 
-        {/* Button */}
         <button
         type="button" 
+        disabled={loading}
           onClick={() => {
-
     handleRegister();
   }}
 
-          className="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded text-white"
+          className={`w-full py-2 rounded text-white ${loading ? 'bg-purple-800 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}
         >
-          Register
+          {loading ? "Registering..." : "Register"}
         </button>
+
 
         {/* Footer */}
         <p className="text-gray-300 text-sm mt-4 text-center">

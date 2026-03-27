@@ -8,25 +8,33 @@ const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET!;
 
 // LOGIN SERVICE
 export const loginUser = async (emailOrUsername: string, password: string) => {
+  const cleanIdentifier = emailOrUsername.trim();
+  const cleanPassword = password.trim();
 
+  console.log("LOGIN ATTEMPT - Identifier:", cleanIdentifier, "Length:", cleanIdentifier.length);
   const user = await prisma.user.findFirst({
     where: { 
       OR: [
-        { email: emailOrUsername },
-        { username: emailOrUsername }
+        { email: cleanIdentifier },
+        { username: cleanIdentifier }
       ]
     },
   });
 
   if (!user) {
+    console.log("LOGIN FAILED - User not found in DB");
     throw new Error("Invalid credentials");
   }
 
-  const isValid = await comparepassword(password, user.password);
+  console.log("LOGIN - User found:", user.username, "Hashed Pass Length:", user.password?.length);
+  const isValid = await comparepassword(cleanPassword, user.password);
+  console.log("LOGIN - Password match result:", isValid, "Input Pass Length:", cleanPassword.length);
 
   if (!isValid) {
     throw new Error("Invalid credentials");
   }
+
+
 
   const payload = {
     id: user.id,

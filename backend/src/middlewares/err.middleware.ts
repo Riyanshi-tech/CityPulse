@@ -18,8 +18,17 @@ export const errorHandler = (
     });
   }
 
+  if (err.code === "P2002") {
+    const fields = err.meta?.target || "unknown field";
+    return res.status(409).json({
+      success: false,
+      message: `${fields} already exists`,
+      error: `Unique constraint failed on ${fields}`
+    });
+  }
+
   res.status(500).json({
     success: false,
     message: err.message || "Internal Server Error"
   });
-};
+};

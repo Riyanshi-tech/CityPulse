@@ -3,20 +3,25 @@ import { loginUser } from "./auth.service";
 import { refreshTokens } from "./auth.service";
 import prisma from "../lib/prisma";
 
-export const loginController = async (req: Request, res: Response) => {
+export const loginController = async (req: Request, res: Response, next: import("express").NextFunction) => {
+  try {
+    const { emailOrUsername, email, username, password } = req.body;
+    const identifier = emailOrUsername || email || username;
 
-  const { email, password } = req.body;
+    const { accessToken, refreshToken, user } = await loginUser(identifier, password);
 
-  const { accessToken, refreshToken, user } = await loginUser(email, password);
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, // Set to true in production
+      sameSite: "strict",
+    });
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "strict",
-  });
-
-  res.json({ accessToken, user });
+    res.json({ accessToken, user });
+  } catch (error) {
+    next(error);
+  }
 };
+
 export const refreshController = async (req : Request, res: Response) => {
 
   const token = req.cookies.refreshToken;
