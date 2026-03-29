@@ -1,4 +1,3 @@
-import { id } from "zod/v4/locales";
 import prisma from "../lib/prisma";
 import { razorpayInstance } from "../lib/razorpay";
 import { verifyRazorpaySignature } from "../utils/verify";
@@ -9,7 +8,9 @@ export const createBooking = async (
   seatIds: string[]
 ) => {
 
-  return prisma.$transaction(async (tx) => {
+    // Step 1: Fetch seats
+    await expireBookingsService();
+    return prisma.$transaction(async (tx) => {
 
     // Step 1: Fetch seats
     const seats = await tx.eventSeat.findMany({
@@ -36,7 +37,6 @@ export const createBooking = async (
     const totalAmount = seats.length * 100; // later dynamic pricing
 
     //  Step 4: Create booking
-    await expireBookingsService();
     const booking = await tx.booking.create({
       data: {
         userId,
@@ -83,7 +83,6 @@ const order = await razorpayInstance.orders.create({
     receipt: bookingId
   });
   // create payment record
-  await expireBookingsService();
   const payment = await prisma.payment.create({
     data:{
       bookingId: booking.id,
@@ -104,7 +103,6 @@ const order = await razorpayInstance.orders.create({
   signature: string
 )=>{
     // Verify Razorpay signature
-    await expireBookingsService();
     const isSignatureValid = verifyRazorpaySignature(bookingId, paymentId, signature);
     if (!isSignatureValid) {
       throw new Error("Invalid payment signature");

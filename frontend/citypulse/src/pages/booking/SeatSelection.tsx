@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../../api/axios";
-
+import { useNavigate } from "react-router-dom";
 export default function SeatSelection() {
   const { eventId } = useParams();
+  const navigate = useNavigate();
 
   const [seats, setSeats] = useState<any[]>([]);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
-  // 🔥 Fetch seats
+  // Fetch seats
   useEffect(() => {
     const fetchSeats = async () => {
       try {
@@ -22,7 +23,7 @@ export default function SeatSelection() {
     fetchSeats();
   }, [eventId]);
 
-  // 🎯 Select seat
+  // Select seat
   const toggleSeat = (seatId: string, status: string) => {
     if (status !== "AVAILABLE") return;
 
@@ -32,10 +33,32 @@ export default function SeatSelection() {
       setSelectedSeats([...selectedSeats, seatId]);
     }
   };
+const handleCreateBooking = async () => {
+  try {
+    console.log("Booking seatIds:", selectedSeats);
+    const res = await api.post(`/booking/events/${eventId}/book`, {
+      seatIds: selectedSeats,
+    });
 
-  // 🔐 Lock seats
+    console.log("BOOKING RESPONSE:", res.data);
+
+    alert(`Booking created Amount: ₹${res.data.booking.totalAmount}`);
+
+    //  Save bookingId for next step
+    const bookingId = res.data.booking.id;
+
+    //  Navigate to payment page (next step)
+    navigate(`/payment/${bookingId}`);
+
+  } catch (err: any) {
+    console.error(err.response?.data);
+    alert(err.response?.data?.message || "Booking failed");
+  }
+};
+  //  Lock seats
   const handleLockSeats = async () => {
     try {
+      console.log("Selected Seats:", selectedSeats); 
       await api.post(`/events/${eventId}/lock-seats`, {
         seatIds: selectedSeats,
       });
@@ -43,6 +66,7 @@ export default function SeatSelection() {
       alert("Seats locked successfully 🎉");
 
     } catch (err: any) {
+      console.log("Selected Seats:", selectedSeats); 
       alert(err.response?.data?.message || "Failed to lock seats");
     }
   };
@@ -51,7 +75,7 @@ export default function SeatSelection() {
     <div className="text-white">
       <h1 className="text-3xl mb-6">Select Seats 🎟</h1>
 
-      {/* 🎯 Seat Grid */}
+      {/*  Seat Grid */}
       
       <div className="grid grid-cols-10 gap-3">
         
@@ -78,13 +102,19 @@ export default function SeatSelection() {
         ))}
       </div>
 
-      {/* 🔘 Action Button */}
+      {/*  Action Button */}
       <button
         onClick={handleLockSeats}
         className="mt-6 bg-purple-600 px-6 py-3 rounded-xl"
       >
         Lock Seats
       </button>
+      <button
+  onClick={handleCreateBooking}
+  className="mt-4 bg-green-600 px-6 py-3 rounded-xl"
+>
+  Continue to Booking →
+</button>
     </div>
   );
 }

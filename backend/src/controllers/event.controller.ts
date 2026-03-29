@@ -38,11 +38,9 @@ export const getAllEventsController = async (req: Request, res: Response) => {
   try {
 
     const events = await getAllEventsService();
-
     res.json(events);
-
   } catch (error) {
-
+    console.error("Error fetching events:", error);
     res.status(500).json({
       message: "Failed to fetch events"
     });

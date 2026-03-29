@@ -8,6 +8,7 @@ export const lockSeats = async (
   
   
 ) => {
+  await expireBookingsService();
 
   return prisma.$transaction(async (tx) => {
 
@@ -34,7 +35,7 @@ export const lockSeats = async (
     const seats = await tx.eventSeat.findMany({
       where: {
         eventId,
-        seatId: { in: seatIds }
+        id: { in: seatIds }
       }
     });
 
@@ -58,12 +59,11 @@ export const lockSeats = async (
         throw new Error("Seat already locked by another user");
       }
     }
-     await expireBookingsService();
     // 🔒 Step 4: Lock seats
     await tx.eventSeat.updateMany({
       where: {
         eventId,
-        seatId: { in: seatIds }
+        id: { in: seatIds }
       },
       data: {
         status: "LOCKED",
@@ -76,7 +76,7 @@ export const lockSeats = async (
     return await tx.eventSeat.findMany({
       where: {
         eventId,
-        seatId: { in: seatIds }
+        id: { in: seatIds }
       }
     });
 

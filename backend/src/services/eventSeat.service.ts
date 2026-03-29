@@ -11,12 +11,12 @@ export const createEventSeats = async (eventId: number, venueId: number) => {
   }
 
   
-  const eventSeatsData = seats.map((seat,index) => ({
+  const eventSeatsData = seats.map((seat, index) => ({
     eventId,
     seatId: seat.id,
     status: SeatStatus.AVAILABLE,
     seatType: seat.seatType,
-    seatNumber: index+1,
+    seatNumber: index + 1,
   }));
  
   
