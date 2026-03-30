@@ -1,18 +1,17 @@
 import prisma from "../lib/prisma";
 import { expireBookingsService } from "./booking.service";
 
+const TX_TIMEOUT = { timeout: 30000 }; // 30s for Neon serverless
+
 export const lockSeats = async (
   eventId: number,
   seatIds: string[],
   userId: number,
-  
-  
 ) => {
   await expireBookingsService();
 
   return prisma.$transaction(async (tx) => {
-
-    const LOCK_DURATION = 5 * 60 * 1000;
+    const LOCK_DURATION = 15 * 60 * 1000;
     const now = new Date();
 
     // 🔓 Step 1: Release expired locks
@@ -45,7 +44,6 @@ export const lockSeats = async (
 
     // 🔒 Step 3: Validate
     for (const seat of seats) {
-
       if (seat.status === "BOOKED") {
         throw new Error("Seat already booked");
       }
@@ -59,6 +57,7 @@ export const lockSeats = async (
         throw new Error("Seat already locked by another user");
       }
     }
+
     // 🔒 Step 4: Lock seats
     await tx.eventSeat.updateMany({
       where: {
@@ -80,6 +79,5 @@ export const lockSeats = async (
       }
     });
 
-  });
-
+  }, TX_TIMEOUT);
 };

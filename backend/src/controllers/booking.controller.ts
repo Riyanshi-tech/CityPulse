@@ -48,17 +48,23 @@ export const createPaymentController = async (
       });
     }
 
-    const payment = await createPaymentService(bookingId, userId);
+    const result = await createPaymentService(bookingId, userId);
 
     res.json({
       message: "Payment created successfully",
-      payment
+      payment: result.payment,
+      order: result.order
     });
 
   } catch (error: any) {
-    res.status(400).json({
-      message: error.message
-    });
+    // Razorpay errors have their message nested differently
+    const message =
+      error?.error?.description ||
+      error?.message ||
+      JSON.stringify(error) ||
+      "Payment creation failed";
+    console.error("[createPayment] Error:", JSON.stringify(error));
+    res.status(400).json({ message });
   }
 };
 export const confirmBookingController = async (

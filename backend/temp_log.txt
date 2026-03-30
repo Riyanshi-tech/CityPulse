@@ -1,0 +1,50 @@
+﻿:\CityPulse\backend\no
+de_modules\@neondataba
+se\serverless\index.js
+:1117:85)
+    at Dn.connect (E:\
+CityPulse\backend\node
+_modules\@neondatabase
+\serverless\index.js:1
+114:1)
+    at Dn.query (E:\Ci
+tyPulse\backend\node_m
+odules\@neondatabase\s
+erverless\index.js:113
+8:1)
+    at Dn.query (E:\Ci
+tyPulse\backend\node_m
+odules\@neondatabase\s
+erverless\index.js:135
+4:96)
+    at PrismaNeonAdapt
+er.performIO (E:\CityP
+ulse\backend\node_modu
+les\@prisma\adapter-ne
+on\dist\index.js:554:4
+0)
+    at PrismaNeonAdapt
+er.queryRaw (E:\CityPu
+lse\backend\node_modul
+es\@prisma\adapter-neo
+n\dist\index.js:515:41
+)
+    at E:\CityPulse\ba
+ckend\src\generated\pr
+isma\runtime\client.js
+:15:44645
+    at xr (E:\CityPuls
+e\backend\src\generate
+d\prisma\runtime\clien
+t.js:15:26620)
+    at e.#u (E:\CityPu
+lse\backend\src\genera
+ted\prisma\runtime\cli
+ent.js:15:47945) {
+  clientVersion: 
+'7.6.0'
+}
+[INFO] 13:49:01 Restarting: E:\CityPulse\backend\src\lib\prisma.ts has been modified
+server running on port 5000
+[INFO] 13:49:07 Restarting: E:\CityPulse\backend\src\lib\prisma.ts has been modified
+server running on port 5000
