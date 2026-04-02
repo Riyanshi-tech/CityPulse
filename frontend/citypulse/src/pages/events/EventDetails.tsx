@@ -21,6 +21,14 @@ export default function EventDetails() {
 
     fetchEvent();
   }, [id]);
+  const handleFavorite = async () => {
+    try {
+      await api.post(`/events/${event.id}/favorites`);
+      alert("Added to favorites ❤️");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (!event) {
     return <div className="text-white">Loading...</div>;
@@ -48,14 +56,23 @@ export default function EventDetails() {
           <p>🗓 {new Date(event.startDateTime).toLocaleString()}</p>
         </div>
 
-        <button
-          onClick={() => navigate(`/booking/${event.id}`)}
-          className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-xl text-white font-semibold"
-        >
-          Book Seats 🎟
-        </button>
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={() => navigate(`/booking/${event.id}`)}
+            className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-xl text-white font-semibold transition-all shadow-lg shadow-purple-600/20"
+          >
+            Book Seats 🎟
+          </button>
+          
+          <button
+            onClick={handleFavorite}
+            className="bg-white/5 hover:bg-pink-500/10 border border-white/10 text-white hover:text-pink-400 px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2 group shadow-lg"
+          >
+            <span className="group-hover:scale-110 transition-transform duration-300">❤️</span>
+            <span>Favorite</span>
+          </button>
+        </div>
       </motion.div>
-
     </div>
   );
 }

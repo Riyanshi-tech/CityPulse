@@ -31,6 +31,18 @@ export const getAllEventsService = async () => {
   });
 };
 
+export const getEventsByOrganizerService = async (organizerId: number) => {
+  return await prisma.events.findMany({
+    where: { organizerId },
+    include: {
+      venue: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 export const getEventByIdService = async (id: number) => {
   return await prisma.events.findUnique({
     where: { id },

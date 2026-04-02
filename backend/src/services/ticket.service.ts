@@ -38,3 +38,16 @@ export const scanTicketService = async (ticketCode: string) => {
     ticket: updatedTicket
   };
 };
+
+export const getTicketsByBookingIdService = async (bookingId: string) => {
+  const tickets = await prisma.ticket.findMany({
+    where: { bookingId },
+    include: {
+      event: true,
+      eventSeat: {
+        include: { seat: true }
+      }
+    }
+  });
+  return tickets;
+};

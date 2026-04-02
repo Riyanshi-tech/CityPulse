@@ -66,7 +66,7 @@ export default function Payment() {
 
       alert("🎉 Booking Confirmed! Your ticket has been generated.");
       console.log("TICKET:", res.data);
-      navigate("/");
+      navigate(`/tickets/${bookingId}`);
 
     } catch (err: any) {
       console.error("Confirm error:", err.response?.data);

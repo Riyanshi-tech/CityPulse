@@ -2,9 +2,11 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { api } from "../../api/axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
    const [role, setRole] = useState<"USER" | "ORGANIZER" |"ADMIN">("USER");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -26,12 +28,27 @@ export default function Register() {
   const handleRegister = async () => {
     setLoading(true);
     try {
-
+      // 1. Register the user
       await api.post("/users", { ...form, role });
 
-      alert("Registered successfully 🎉");
-      //redirect to login
-      navigate("/login");
+      // 2. Automatically log them in
+      const loginRes = await api.post("/auth/login", {
+        emailOrUsername: form.username,
+        password: form.password,
+      });
+
+      // 3. Store token and user state
+      localStorage.setItem("token", loginRes.data.accessToken);
+      setUser(loginRes.data.user);
+
+      alert("Registered successfully! Redirecting... 🚀");
+
+      // 4. Redirect based on role
+      if (role === "ORGANIZER") {
+        navigate("/organizer");
+      } else {
+        navigate("/");
+      }
     } catch (err: any) {
       console.error("Registration Error details:", err.response?.data || err.message);
       const errorMessage = err.response?.data?.message || err.response?.data?.error || "Registration failed";

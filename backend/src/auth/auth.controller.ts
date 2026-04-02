@@ -40,7 +40,8 @@ export const refreshController = async (req : Request, res: Response) => {
 
   res.json({ accessToken });
 };
-export const updateProfileController = async (req: Request, res: Response) => {
+import { AuthRequest } from "../middlewares/auth.middleware";
+export const updateProfileController = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ message: "Unauthorized" });
   }

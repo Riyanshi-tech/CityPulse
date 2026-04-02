@@ -73,19 +73,7 @@ export const confirmBookingController = async (
   try {
     const userId = req.user.id;
     const {bookingId,paymentId,razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    const result = await confirmPaymentService(bookingId, paymentId, userId, razorpay_signature);
-    const isValid = verifyRazorpaySignature(
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature
-    );
-
-    if (!isValid) {
-      return res.status(400).json({
-        message: "Invalid payment signature"
-      });
-    }
-    
+    const result = await confirmPaymentService(bookingId, paymentId, razorpay_order_id, razorpay_payment_id, userId, razorpay_signature);
     
 
     res.json(result);

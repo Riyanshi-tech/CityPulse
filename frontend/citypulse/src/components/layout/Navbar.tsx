@@ -58,13 +58,21 @@ return (
               >
                 Login
               </button>
-
+               <button onClick={() => navigate("/favorites")}>
+                ❤️ Favorites
+              </button>
               <button
                 onClick={() => navigate("/register")}
                 className="px-5 py-1.5 rounded-full bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-500/20 transition-all font-semibold"
               >
                 Register
               </button>
+              {user?.role === "ORGANIZER" && (
+  <button onClick={() => navigate("/organizer")}>
+    Organizer Panel 🎤
+  </button>
+)}
+
             </div>
           )}
         </div>

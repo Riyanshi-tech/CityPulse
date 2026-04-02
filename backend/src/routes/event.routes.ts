@@ -5,7 +5,8 @@ import {
   getEventByIdController,
   updateEventController,
   deleteEventController,
-  getEventSeatsController
+  getEventSeatsController,
+  getOrganizerEventsController
 } from "../controllers/event.controller";
 
 import { authMiddleware } from "../middlewares/auth.middleware";
@@ -16,6 +17,7 @@ const router = Router();
 
 
 router.get("/events", getAllEventsController);
+router.get("/events/organizer", authMiddleware, roleMiddleware(["ORGANIZER", "ADMIN"]), getOrganizerEventsController);
 
 router.get("/events/:id", getEventByIdController);
 

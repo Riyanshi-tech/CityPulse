@@ -23,7 +23,11 @@ export default function Login() {
       setUser(res.data.user);
 
       //  redirect
-      navigate("/");
+      if (res.data.user.role === "ORGANIZER") {
+        navigate("/organizer");
+      } else {
+        navigate("/");
+      }
 
     } catch (err: any) {
       console.log(err.response);

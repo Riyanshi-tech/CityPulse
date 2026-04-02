@@ -3,7 +3,7 @@ import { razorpayInstance } from "../lib/razorpay";
 import { verifyRazorpaySignature } from "../utils/verify";
 import { generateQRCode } from "../utils/qrCode";
 
-const TX_TIMEOUT = { timeout: 30000 }; // 30s for Neon serverless
+const TX_TIMEOUT = { maxWait: 10000, timeout: 30000 }; // 10s wait, 30s timeout for Neon
 
 export const createBooking = async (
   userId: number,
@@ -107,11 +107,13 @@ export const createPaymentService = async (
 export const confirmPaymentService = async (
   bookingId: string,
   paymentId: string,
+  razorpay_order_id: string,
+  razorpay_payment_id: string,
   userId: number,
   signature: string
 ) => {
   // Verify Razorpay signature
-  const isSignatureValid = verifyRazorpaySignature(bookingId, paymentId, signature);
+  const isSignatureValid = verifyRazorpaySignature(razorpay_order_id, razorpay_payment_id, signature);
   if (!isSignatureValid) {
     throw new Error("Invalid payment signature");
   }
@@ -134,10 +136,11 @@ export const confirmPaymentService = async (
 
     // update payment status
     await tx.payment.updateMany({
-      where: { bookingId: bookingId },
+      where: { id: paymentId },
       data: {
         status: "SUCCESS",
-        gatewayPaymentId: paymentId,
+        gatewayPaymentId: razorpay_payment_id,
+        gatewaySignature: signature,
         completedAt: new Date()
       },
     });
@@ -152,16 +155,16 @@ export const confirmPaymentService = async (
     });
 
     // mark seats as booked
-    await tx.eventSeat.updateMany({
-      where: {
-        bookingId: bookingId
-      },
-      data: {
-        status: "BOOKED",
-        lockedAt: null,
-        lockedById: null
-      }
-    });
+    for (const seat of booking.eventSeats) {
+      await tx.eventSeat.update({
+        where: { id: seat.id },
+        data: {
+          status: "BOOKED",
+          lockedAt: null,
+          lockedById: null
+        }
+      });
+    }
 
     // generate tickets
     const ticketsData = [];
@@ -224,17 +227,17 @@ export const expireBookingsService = async () => {
       });
 
       // Release seats
-      await tx.eventSeat.updateMany({
-        where: {
-          bookingId: booking.id
-        },
-        data: {
-          status: "AVAILABLE",
-          lockedAt: null,
-          lockedById: null,
-          bookingId: null
-        }
-      });
+      for (const seat of booking.eventSeats) {
+        await tx.eventSeat.update({
+          where: { id: seat.id },
+          data: {
+            status: "AVAILABLE",
+            lockedAt: null,
+            bookingId: null,
+            lockedById: null
+          }
+        });
+      }
     }, TX_TIMEOUT);
   }
 };

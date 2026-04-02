@@ -5,7 +5,8 @@ import {
   getEventByIdService,
   getEventSeatsService,
   updateEventService,
-  deleteEventService
+  deleteEventService,
+  getEventsByOrganizerService
 } from "../services/event.service";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { log } from "node:console";
@@ -47,6 +48,19 @@ export const getAllEventsController = async (req: Request, res: Response) => {
 
   }
 
+};
+
+export const getOrganizerEventsController = async (req: AuthRequest, res: Response) => {
+  try {
+    const organizerId = req.user.id;
+    const events = await getEventsByOrganizerService(organizerId);
+    res.json(events);
+  } catch (error) {
+    console.error("Error fetching organizer events:", error);
+    res.status(500).json({
+      message: "Failed to fetch your events"
+    });
+  }
 };
 
 
