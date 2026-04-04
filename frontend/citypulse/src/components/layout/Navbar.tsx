@@ -49,6 +49,15 @@ return (
               >
                 Logout
               </button>
+
+              {user.role === "ORGANIZER" && (
+                <button
+                  onClick={() => navigate("/organizer")}
+                  className="px-4 py-1.5 rounded-full bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/30 text-purple-400 transition-all"
+                >
+                  Organizer Panel 🎤
+                </button>
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-3">
@@ -67,11 +76,6 @@ return (
               >
                 Register
               </button>
-              {user?.role === "ORGANIZER" && (
-  <button onClick={() => navigate("/organizer")}>
-    Organizer Panel 🎤
-  </button>
-)}
 
             </div>
           )}
