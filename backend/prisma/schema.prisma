@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  engineType = "library"
+   url      = env("DATABASE_URL")
 }
 
 datasource db {

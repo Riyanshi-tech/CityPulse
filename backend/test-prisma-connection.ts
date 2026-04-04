@@ -1,4 +1,6 @@
-import prisma from './src/lib/prisma';
+import * as dotenv from 'dotenv';
+dotenv.config();
+import { prisma } from './src/lib/prisma';
 
 async function main() {
   try {
@@ -9,6 +11,12 @@ async function main() {
     process.exit(0);
   } catch (error) {
     console.error('Database connection failed:', error);
+    if (error instanceof Error) {
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      // @ts-ignore
+      if (error.cause) console.error('Error cause:', error.cause);
+    }
     process.exit(1);
   }
 }
