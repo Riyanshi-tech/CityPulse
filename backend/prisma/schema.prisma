@@ -150,7 +150,7 @@ model Ticket {
   eventSeatId String       @unique
   userId      Int
   eventId     Int
-  ticketCode  String       
+  ticketCode  String       @unique
   qrCodeData  String
   status      TicketStatus @default(ISSUED)
   issuedAt    DateTime     @default(now())

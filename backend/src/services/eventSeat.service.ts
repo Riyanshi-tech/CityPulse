@@ -1,5 +1,5 @@
 import {prisma} from "../lib/prisma";
-import { SeatStatus } from "../generated/prisma/client";
+import { SeatStatus } from "@prisma/client";
 
 export const createEventSeats = async (eventId: number, venueId: number) => {
   const seats = await prisma.seat.findMany({
